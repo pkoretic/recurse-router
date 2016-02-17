@@ -31,14 +31,11 @@ namespace Module
         HTTP_Method HTTP_HEAD;
         HTTP_Method HTTP_OPTIONS;
 
-        QHash<QString, HTTP_Method*> methods{
-           { "GET", &HTTP_GET },
-           { "PUT", &HTTP_PUT },
-           { "POST", &HTTP_POST },
-           { "PATCH", &HTTP_PATCH },
-           { "DELETE", &HTTP_DELETE },
-           { "HEAD", &HTTP_HEAD },
-           { "OPTIONS", &HTTP_OPTIONS },
+        QHash<QString, HTTP_Method *> methods{
+            { "GET", &HTTP_GET }, { "PUT", &HTTP_PUT },
+            { "POST", &HTTP_POST }, { "PATCH", &HTTP_PATCH },
+            { "DELETE", &HTTP_DELETE }, { "HEAD", &HTTP_HEAD },
+            { "OPTIONS", &HTTP_OPTIONS },
         };
 
         // https://tools.ietf.org/html/rfc3986#appendix-A
@@ -47,17 +44,21 @@ namespace Module
             path.prepend("^");
 
             auto colon = path.indexOf(":");
-            if(colon != -1)
+            if (colon != -1)
             {
                 auto question = path.indexOf("?", colon);
-                if(question != -1)
-                    path.replace(QRegularExpression("/:[A-z0-9]+\\?"), "(?:/([^/]+?))?(?:/(?=$))?");
+                if (question != -1)
+                    // optional arguments :name?
+                    path.replace(QRegularExpression("/:[A-z0-9]+\\?"),
+                    "(?:/([^/]+?))?(?:/(?=$))?");
                 else
+                    // regular arguments :name
                     path.replace(QRegularExpression(":[A-z0-9]+"), "[^/]+?");
             }
 
+            // catch-all argument /name/*
             auto asterix = path.indexOf("*");
-            if(asterix != -1)
+            if (asterix != -1)
                 path.insert(asterix, ".");
 
             path.append("$");
@@ -66,7 +67,6 @@ namespace Module
         }
 
     public:
-
         Router()
         {
             QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
@@ -113,13 +113,13 @@ namespace Module
 
         void ALL(QString path, Downstream next)
         {
-           GET(path, next);
-           PUT(path, next);
-           POST(path, next);
-           PATCH(path, next);
-           HEAD(path, next);
-           DELETE(path, next);
-           OPTIONS(path, next);
+            GET(path, next);
+            PUT(path, next);
+            POST(path, next);
+            PATCH(path, next);
+            HEAD(path, next);
+            DELETE(path, next);
+            OPTIONS(path, next);
         }
 
         auto routes()
@@ -128,7 +128,7 @@ namespace Module
             {
                 auto request = ctx.request;
 
-                if(!methods.contains(request.method))
+                if (!methods.contains(request.method))
                     return next();
 
                 auto method = *(methods[request.method]);
@@ -138,21 +138,21 @@ namespace Module
                 auto path = url.path();
 
                 // call first route that matches
-                for(auto pair : method)
+                for (auto pair : method)
                 {
                     auto key = pair.first;
 
                     this->debug("trying path:" + key);
 
                     QRegularExpression regexp(this->path_to_regexp(key));
-                    if(!regexp.isValid() || !regexp.match(path).hasMatch())
+                    if (!regexp.isValid() || !regexp.match(path).hasMatch())
                         continue;
 
                     this->debug("path matched");
 
                     // parse parameters if any
                     auto colon = key.indexOf(":");
-                    if(colon)
+                    if (colon)
                     {
                         // we use QStringRef so we don't allocate on search
                         auto matchString = key.midRef(colon);
@@ -164,11 +164,11 @@ namespace Module
                         // match: /hello/:id/:/name
                         // request: /hello/1/test
 
-                        for(int i = 0; i < matches.size(); i++)
+                        for (int i = 0; i < matches.size(); i++)
                         {
                             auto match = matches.at(i);
                             colon = match.indexOf(":");
-                            if(colon == -1)
+                            if (colon == -1)
                                 continue;
 
                             auto paramKey = match.mid(colon + 1, match.indexOf("?") - 1);
