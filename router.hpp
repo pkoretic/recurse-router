@@ -21,6 +21,7 @@ namespace Module
                 std::cout << "(router debug) " << message.toStdString() << std::endl;
         }
 
+        using Downstream = Recurse::Downstream;
         using HTTP_Method = QList<QPair<QString, Downstream>>;
 
         HTTP_Method HTTP_GET;
