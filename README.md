@@ -29,7 +29,7 @@ int main(int argc, char *argv[])
 
     router.GET("/hello/:user", [](auto &ctx, auto /* next */)
     {
-        ctx.response.send("Hello World " + ctx.request.params["user"]);
+        ctx.response.send("Hello World " + ctx.request.getParam("user");
     });
 
 	app.listen();
@@ -37,6 +37,16 @@ int main(int argc, char *argv[])
 ```
 
 ### Parameters
+
+
+Parameters are saved in QHash `params` property inside **Recurse** `Request` class.
+To fetch values use `Request::getParam(key)` helper function:
+
+```
+ctx.request.getParam("name")
+```
+
+Standard, required params:
 
 ```
 #include "router.hpp"
@@ -50,27 +60,42 @@ int main(int argc, char *argv[])
     // matches /hello/john
     router.GET("/hello/:name", [](auto &ctx, auto /* next */)
     {
-        ctx.response.send("hello world " + ctx.request.params["name"]);
-    });
-
-    // matches both /hi and /hi/johnny requests
-    router.GET("/hi/:user?", [](auto &ctx, auto /* next */)
-    {
-        ctx.response.send("hi " + ctx.request.params["name"]);
-    });
-
-    // matches all GET calls (those that are not catched above)
-    router.GET("*", [](auto &ctx, auto /* next */)
-    {
-        ctx.response.send("hi " + ctx.request.params["name"]);
-    });
-
-    // matches all calls (those that are not catched above)
-    router.ALL("*", [](auto &ctx, auto /* next */)
-    {
-        ctx.response.send("nothing matched");
+        ctx.response.send("hello world " + ctx.request.getParam("name");
     });
 
 	app.listen();
 }
+
+```
+
+Optional params
+
+```
+
+    // matches both /hi and /hi/johnny requests
+    router.GET("/hi/:user?", [](auto &ctx, auto /* next */)
+    {
+        ctx.response.send("hi " + ctx.request.getParam("name");
+    });
+```
+
+Universal, catch-all parameter
+
+```
+    // matches all GET calls (those that are not catched before hand)
+    router.GET("*", [](auto &ctx, auto /* next */)
+    {
+        ctx.response.send("hi all");
+    });
+
+```
+
+catch-all with Router.ALL, matches everything
+```
+    // matches all calls (those that are not catched before hand)
+    router.ALL("*", [](auto &ctx, auto /* next */)
+    {
+        ctx.response.send("all matched, all catched");
+    });
+
 ```
