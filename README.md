@@ -29,7 +29,7 @@ int main(int argc, char *argv[])
 
     router.GET("/hello/:user", [](auto &ctx, auto /* next */)
     {
-        ctx.response.send("Hello World " + ctx.request.getParam("user");
+        ctx.response.send("Hello World " + ctx.request.getParam("user"));
     });
 
 	app.listen();
